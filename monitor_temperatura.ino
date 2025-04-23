@@ -20,6 +20,11 @@ double Kp = 2.0, Ki = 0.5, Kd = 1.0;
 // Crear el objeto PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
+// Variables para el temporizador no bloqueante
+unsigned long previousMillis = 0; // Tiempo anterior en milisegundos
+const long interval = 2000;        // Intervalo entre lecturas (2 segundos)
+unsigned long startTime = 0;
+
 void setup() {
   // Inicializar comunicación serial
   Serial.begin(9600);
@@ -27,6 +32,11 @@ void setup() {
   // Inicializar el sensor DHT11
   dht.begin();
   
+  while (Serial.available()) {
+    Serial.read(); // Descartar cualquier dato residual
+  }
+
+  startTime = millis();
   // Configurar el pin del relé como salida
   pinMode(RELAY_PIN, OUTPUT);
   digitalWrite(RELAY_PIN, LOW); // Apagar el relé inicialmente
@@ -37,37 +47,50 @@ void setup() {
 }
 
 void loop() {
-  // Leer la temperatura del DHT11
-  float temperature = dht.readTemperature();
-  float humidity = dht.readHumidity();
-  
-  if (isnan(temperature) || isnan(humidity)) {
-    Serial.println("Error al leer el sensor DHT11");
-    return;
+
+  if (millis() - startTime < 2000) {
+    return; // Salir del loop hasta que pasen 2 segundos
   }
-  
-  // Actualizar la entrada del PID
-  Input = temperature;
-  
-  // Calcular la salida del PID
-  myPID.Compute();
-  
-  // Controlar el relé según la salida del PID
-  if (Output > 0) {
-    digitalWrite(RELAY_PIN, HIGH); // Encender el calentador
-  } else {
-    digitalWrite(RELAY_PIN, LOW);  // Apagar el calentador
+  // Obtener el tiempo actual
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= interval) {
+    // Guardar el tiempo actual como referencia
+    previousMillis = currentMillis;
+
+
+    // Leer la temperatura del DHT11
+    float temperature = dht.readTemperature();
+    float humidity = dht.readHumidity();
+    
+    if (isnan(temperature) || isnan(humidity)) {
+      Serial.println("Error al leer el sensor DHT11");
+      return;
+    }
+    
+    // Actualizar la entrada del PID
+    Input = temperature;
+    
+    // Calcular la salida del PID
+    myPID.Compute();
+    
+    // Controlar el relé según la salida del PID
+    if (Output > 0) {
+      digitalWrite(RELAY_PIN, HIGH); // Encender el calentador
+    } else {
+      digitalWrite(RELAY_PIN, LOW);  // Apagar el calentador
+    }
+    
+    // Mostrar información en el monitor serial
+    // Mostrar información en el monitor serial
+    String json = "{\"temperature\":";
+    json += String(temperature, 2);
+    json += ",\"humidity\":";
+    json += String(humidity, 2);
+    json += ",\"pid_output\":";
+    json += String(Output, 2);
+    json += "}";
+    Serial.println(json);
+    
   }
-  
-  // Mostrar información en el monitor serial
-  Serial.print("Temperatura: ");
-  Serial.print(temperature);
-  Serial.print(" °C, Humedad: ");
-  Serial.print(humidity);
-  Serial.print(" °C, Salida PID: ");
-  Serial.print(Output);
-  Serial.println("%");
-  
-  // Esperar antes de la siguiente lectura
-  delay(2000); // 2 segundos
 }
