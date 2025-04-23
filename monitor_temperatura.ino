@@ -39,8 +39,9 @@ void setup() {
 void loop() {
   // Leer la temperatura del DHT11
   float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
   
-  if (isnan(temperature)) {
+  if (isnan(temperature) || isnan(humidity)) {
     Serial.println("Error al leer el sensor DHT11");
     return;
   }
@@ -61,6 +62,8 @@ void loop() {
   // Mostrar información en el monitor serial
   Serial.print("Temperatura: ");
   Serial.print(temperature);
+  Serial.print(" °C, Humedad: ");
+  Serial.print(humidity);
   Serial.print(" °C, Salida PID: ");
   Serial.print(Output);
   Serial.println("%");
