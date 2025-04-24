@@ -47,50 +47,37 @@ void setup() {
 }
 
 void loop() {
+  // Leer la temperatura y humedad del DHT11
+  float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
 
-  if (millis() - startTime < 2000) {
-    return; // Salir del loop hasta que pasen 2 segundos
+  if (isnan(temperature) || isnan(humidity)) {
+    Serial.println("Error al leer el sensor DHT11");
+    return;
   }
-  // Obtener el tiempo actual
-  unsigned long currentMillis = millis();
-
-  if (currentMillis - previousMillis >= interval) {
-    // Guardar el tiempo actual como referencia
-    previousMillis = currentMillis;
-
-
-    // Leer la temperatura del DHT11
-    float temperature = dht.readTemperature();
-    float humidity = dht.readHumidity();
-    
-    if (isnan(temperature) || isnan(humidity)) {
-      Serial.println("Error al leer el sensor DHT11");
-      return;
-    }
-    
-    // Actualizar la entrada del PID
-    Input = temperature;
-    
-    // Calcular la salida del PID
-    myPID.Compute();
-    
-    // Controlar el relé según la salida del PID
-    if (Output > 0) {
-      digitalWrite(RELAY_PIN, HIGH); // Encender el calentador
-    } else {
-      digitalWrite(RELAY_PIN, LOW);  // Apagar el calentador
-    }
-    
-    // Mostrar información en el monitor serial
-    // Mostrar información en el monitor serial
-    String json = "{\"temperature\":";
-    json += String(temperature, 2);
-    json += ",\"humidity\":";
-    json += String(humidity, 2);
-    json += ",\"pid_output\":";
-    json += String(Output, 2);
-    json += "}";
-    Serial.println(json);
-    
+  
+  // Actualizar la entrada del PID
+  Input = temperature;
+  
+  // Calcular la salida del PID
+  myPID.Compute();
+  
+  // Controlar el relé según la salida del PID
+  if (Output > 0) {
+    digitalWrite(RELAY_PIN, HIGH); // Encender el calentador
+  } else {
+    digitalWrite(RELAY_PIN, LOW);  // Apagar el calentador
   }
+   
+  // Mostrar información en el monitor serial
+  Serial.print("Temperatura: ");
+  Serial.print(temperature);
+  Serial.print(" °C, Humedad: ");
+  Serial.print(humidity);
+  Serial.print(" %, Salida PID: ");
+  Serial.print(Output);
+  Serial.println("%");
+  
+  // Esperar antes de la siguiente lectura
+  delay(2000); // 2 segundos
 }
