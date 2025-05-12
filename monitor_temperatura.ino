@@ -2,12 +2,12 @@
 #include <PID_v1.h>
 
 // Configuración del DHT11
-#define DHTPIN 2       // Pin donde está conectado el DHT11
+#define DHTPIN 4       // Pin donde está conectado el DHT11
 #define DHTTYPE DHT11  // Tipo de sensor
 DHT dht(DHTPIN, DHTTYPE);
 
 // Configuración del relé
-#define RELAY_PIN 8    // Pin donde está conectado el relé
+#define RELAY_PIN 3    // Pin donde está conectado el relé
 
 // Variables para el PID
 double Setpoint = 22.0; // Temperatura deseada (en grados Celsius)
