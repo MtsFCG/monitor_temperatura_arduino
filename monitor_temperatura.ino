@@ -7,8 +7,8 @@
 DHT dht(DHTPIN, DHTTYPE);
 
 // Configuración del relé
-#define RELAY_PIN 3    // Pin donde está conectado el relé
-
+#define RELAY_PIN_PAR_RESISTENCIAS_CENTRALES_VENTILADOR 3   // Pin donde está conectado el relé 1 , primer par de resistencias que se deben prender 
+#define RELAY_PIN_B_PAR_RESISTENCIAS_EXTERIORES_HUMIFICADOR 2   // Pin donde está conectado el relé 1 , primer par de resistencias que se deben prender 
 // Variables para el PID
 double Setpoint = 22.0; // Temperatura deseada (en grados Celsius)
 double Input;           // Temperatura actual leída del DHT11
@@ -28,9 +28,11 @@ void setup() {
   dht.begin();
   
   // Configurar el pin del relé como salida
-  pinMode(RELAY_PIN, OUTPUT);
-  digitalWrite(RELAY_PIN, LOW); // Apagar el relé inicialmente
-  
+  pinMode(RELAY_PIN_PAR_RESISTENCIAS_CENTRALES_VENTILADOR, OUTPUT);
+  pinMode(RELAY_PIN_B_PAR_RESISTENCIAS_EXTERIORES_HUMIFICADOR, OUTPUT);
+  digitalWrite(RELAY_PIN_PAR_RESISTENCIAS_CENTRALES_VENTILADOR, LOW); // Apagar el relé inicialmente
+  digitalWrite(RELAY_PIN_B_PAR_RESISTENCIAS_EXTERIORES_HUMIFICADOR, LOW);
+
   // Configurar el controlador PID
   myPID.SetMode(AUTOMATIC); // Modo automático
   myPID.SetOutputLimits(0, 100); // Límites de salida (0-100%)
